@@ -3,136 +3,638 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bluetooth Test</title>
+    <title>Tindeq Progressor 200</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        .container {
             max-width: 400px;
-            margin: 50px auto;
+            margin: 0 auto;
             padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
             text-align: center;
-        }
-        button {
-            background: #007bff;
+            margin-bottom: 30px;
             color: white;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .connection-status {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ef4444;
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.connected {
+            background: #10b981;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .btn {
+            padding: 12px 24px;
             border: none;
-            padding: 15px 30px;
-            font-size: 16px;
-            border-radius: 5px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
             cursor: pointer;
-            margin: 10px;
+            transition: all 0.3s ease;
+            text-align: center;
+            display: inline-block;
+            text-decoration: none;
         }
-        button:hover {
-            background: #0056b3;
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
         }
-        .status {
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .force-display {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .force-value {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .force-unit {
+            font-size: 1.2rem;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
             margin: 20px 0;
-            padding: 10px;
-            border-radius: 5px;
         }
-        .error { background: #ffe6e6; color: #d00; }
-        .success { background: #e6ffe6; color: #080; }
-        .info { background: #e6f3ff; color: #006; }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .control-group select,
+        .control-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .control-group select:focus,
+        .control-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .log {
+            background: #1f2937;
+            color: #e5e7eb;
+            padding: 15px;
+            border-radius: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 2px 0;
+        }
+
+        .log-entry.error {
+            color: #ef4444;
+        }
+
+        .log-entry.success {
+            color: #10b981;
+        }
+
+        .log-entry.info {
+            color: #3b82f6;
+        }
+
+        .chart-container {
+            height: 200px;
+            margin: 20px 0;
+            background: #f9fafb;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .controls {
+                grid-template-columns: 1fr;
+            }
+            
+            .force-value {
+                font-size: 2.5rem;
+            }
+        }
+
+        .footer {
+            margin-top: auto;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.8rem;
+            padding: 20px 0;
+        }
     </style>
 </head>
 <body>
-    <h1>Bluetooth API Test</h1>
-    <p>This will test if Web Bluetooth works in your environment</p>
-    
-    <button onclick="testBluetooth()">Test Bluetooth</button>
-    <button onclick="scanForProgressor()">Scan for Progressor</button>
-    
-    <div id="status"></div>
-    
+    <div class="container">
+        <div class="header">
+            <h1>Tindeq Progressor 200</h1>
+            <p>Professional Force Measurement</p>
+        </div>
+
+        <div class="card">
+            <div class="connection-status">
+                <div class="status-indicator">
+                    <div class="status-dot" id="statusDot"></div>
+                    <span id="statusText">Disconnected</span>
+                </div>
+                <button class="btn btn-primary" id="connectBtn">Connect</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="force-display">
+                <div class="force-value" id="forceValue">0.0</div>
+                <div class="force-unit">kg</div>
+            </div>
+            
+            <div class="chart-container" id="chartContainer">
+                Real-time force chart will appear here
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="controls">
+                <button class="btn btn-secondary" id="startBtn" disabled>Start</button>
+                <button class="btn btn-secondary" id="stopBtn" disabled>Stop</button>
+                <button class="btn btn-secondary" id="tareBtn" disabled>Tare</button>
+                <button class="btn btn-secondary" id="calibrateBtn" disabled>Calibrate</button>
+            </div>
+            
+            <div class="control-group">
+                <label for="sampleRate">Sample Rate (Hz)</label>
+                <select id="sampleRate">
+                    <option value="10">10 Hz</option>
+                    <option value="20">20 Hz</option>
+                    <option value="40">40 Hz</option>
+                    <option value="80" selected>80 Hz</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label for="filterRate">Filter Rate (Hz)</label>
+                <select id="filterRate">
+                    <option value="0.5">0.5 Hz</option>
+                    <option value="1">1 Hz</option>
+                    <option value="2">2 Hz</option>
+                    <option value="5" selected>5 Hz</option>
+                    <option value="10">10 Hz</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3 style="margin-bottom: 15px;">Activity Log</h3>
+            <div class="log" id="activityLog">
+                <div class="log-entry info">Ready to connect to Progressor 200...</div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Built with Web Bluetooth API | Open Source</p>
+        </div>
+    </div>
+
     <script>
-        function showStatus(message, type = 'info') {
-            const statusDiv = document.getElementById('status');
-            statusDiv.className = `status ${type}`;
-            statusDiv.innerHTML = message;
-        }
-
-        async function testBluetooth() {
-            showStatus('Testing Web Bluetooth support...', 'info');
-            
-            try {
-                // Check basic support
-                if (!navigator.bluetooth) {
-                    throw new Error('Web Bluetooth not supported in this browser');
-                }
+        class TindeqProgressor {
+            constructor() {
+                this.device = null;
+                this.server = null;
+                this.service = null;
+                this.controlCharacteristic = null;
+                this.dataCharacteristic = null;
+                this.isConnected = false;
+                this.isStreaming = false;
+                this.forceData = [];
                 
-                // Check secure context
-                if (!window.isSecureContext) {
-                    throw new Error('Web Bluetooth requires HTTPS connection');
-                }
+                // Tindeq Progressor Bluetooth characteristics
+                this.SERVICE_UUID = '7e4e1701-1ea6-40c9-9dcc-13d34ffead57';
+                this.CONTROL_CHARACTERISTIC_UUID = '7e4e1702-1ea6-40c9-9dcc-13d34ffead57';
+                this.DATA_CHARACTERISTIC_UUID = '7e4e1703-1ea6-40c9-9dcc-13d34ffead57';
                 
-                // Check availability
-                const available = await navigator.bluetooth.getAvailability();
-                if (!available) {
-                    throw new Error('Bluetooth not available on this device');
-                }
-                
-                showStatus('✅ Web Bluetooth is supported and available!', 'success');
-                
-            } catch (error) {
-                let solutions = [];
-                
-                if (error.message.includes('not supported')) {
-                    solutions = [
-                        'Use Chrome or Edge browser',
-                        'Enable Web Bluetooth: chrome://flags/#enable-web-bluetooth',
-                        'Try on Android Chrome'
-                    ];
-                } else if (error.message.includes('HTTPS')) {
-                    solutions = [
-                        'Host on GitHub Pages or Netlify',
-                        'Use HTTPS server',
-                        'Test on localhost with --allow-running-insecure-content flag'
-                    ];
-                } else if (error.message.includes('not available')) {
-                    solutions = [
-                        'Enable Bluetooth in system settings',
-                        'Grant browser Bluetooth permissions',
-                        'Try refreshing the page'
-                    ];
-                }
-                
-                showStatus(`❌ ${error.message}<br><br>Solutions:<br>• ${solutions.join('<br>• ')}`, 'error');
+                this.initializeEventListeners();
+                this.log('Tindeq Progressor Web App initialized', 'info');
             }
-        }
 
-        async function scanForProgressor() {
-            showStatus('Scanning for Progressor devices...', 'info');
-            
-            try {
-                if (!navigator.bluetooth) {
-                    throw new Error('Web Bluetooth not supported');
-                }
-                
-                const device = await navigator.bluetooth.requestDevice({
-                    filters: [
-                        { name: 'Progressor' },
-                        { namePrefix: 'Progressor' },
-                        { namePrefix: 'Tindeq' }
-                    ],
-                    optionalServices: ['7e4e1701-1ea6-40c9-9dcc-13d34ffead57']
-                });
-                
-                showStatus(`✅ Found device: ${device.name || 'Unknown'}<br>ID: ${device.id}`, 'success');
-                
-            } catch (error) {
-                if (error.name === 'NotFoundError') {
-                    showStatus('❌ No Progressor devices found.<br><br>Make sure:<br>• Device is turned on<br>• Device is in pairing mode<br>• You\'re close to the device', 'error');
-                } else if (error.name === 'SecurityError') {
-                    showStatus('❌ Security/Permission error.<br><br>This usually means:<br>• Need HTTPS connection<br>• Browser permissions blocked<br>• Web Bluetooth disabled', 'error');
+            initializeEventListeners() {
+                document.getElementById('connectBtn').addEventListener('click', () => this.toggleConnection());
+                document.getElementById('startBtn').addEventListener('click', () => this.startStreaming());
+                document.getElementById('stopBtn').addEventListener('click', () => this.stopStreaming());
+                document.getElementById('tareBtn').addEventListener('click', () => this.tare());
+                document.getElementById('calibrateBtn').addEventListener('click', () => this.calibrate());
+                document.getElementById('sampleRate').addEventListener('change', (e) => this.setSampleRate(e.target.value));
+                document.getElementById('filterRate').addEventListener('change', (e) => this.setFilterRate(e.target.value));
+            }
+
+            async toggleConnection() {
+                if (this.isConnected) {
+                    await this.disconnect();
                 } else {
-                    showStatus(`❌ ${error.name}: ${error.message}`, 'error');
+                    await this.connect();
+                }
+            }
+
+            async connect() {
+                try {
+                    this.log('Scanning for Progressor 200...', 'info');
+                    
+                    // Check if Web Bluetooth is supported
+                    if (!navigator.bluetooth) {
+                        throw new Error('Web Bluetooth not supported. Use Chrome/Edge on Android or enable experimental features.');
+                    }
+
+                    // Request device
+                    this.device = await navigator.bluetooth.requestDevice({
+                        filters: [
+                            { name: 'Progressor' },
+                            { namePrefix: 'Progressor' }
+                        ],
+                        optionalServices: [this.SERVICE_UUID]
+                    });
+
+                    this.log(`Found device: ${this.device.name}`, 'success');
+
+                    // Connect to GATT server
+                    this.server = await this.device.gatt.connect();
+                    this.log('Connected to GATT server', 'success');
+
+                    // Get service
+                    this.service = await this.server.getPrimaryService(this.SERVICE_UUID);
+                    this.log('Found Progressor service', 'success');
+
+                    // Get characteristics
+                    this.controlCharacteristic = await this.service.getCharacteristic(this.CONTROL_CHARACTERISTIC_UUID);
+                    this.dataCharacteristic = await this.service.getCharacteristic(this.DATA_CHARACTERISTIC_UUID);
+                    
+                    this.log('Characteristics found', 'success');
+
+                    // Enable notifications for data characteristic
+                    await this.dataCharacteristic.startNotifications();
+                    this.dataCharacteristic.addEventListener('characteristicvaluechanged', (event) => {
+                        this.handleDataReceived(event.target.value);
+                    });
+
+                    this.isConnected = true;
+                    this.updateConnectionStatus();
+                    this.enableControls(true);
+                    
+                    this.log('Successfully connected to Progressor 200!', 'success');
+
+                    // Add disconnect event listener
+                    this.device.addEventListener('gattserverdisconnected', () => {
+                        this.handleDisconnection();
+                    });
+
+                } catch (error) {
+                    this.log(`Connection failed: ${error.message}`, 'error');
+                    console.error('Connection error:', error);
+                }
+            }
+
+            async disconnect() {
+                try {
+                    if (this.isStreaming) {
+                        await this.stopStreaming();
+                    }
+                    
+                    if (this.server) {
+                        this.server.disconnect();
+                    }
+                    
+                    this.handleDisconnection();
+                    this.log('Disconnected from Progressor 200', 'info');
+                } catch (error) {
+                    this.log(`Disconnect error: ${error.message}`, 'error');
+                }
+            }
+
+            handleDisconnection() {
+                this.isConnected = false;
+                this.isStreaming = false;
+                this.device = null;
+                this.server = null;
+                this.service = null;
+                this.controlCharacteristic = null;
+                this.dataCharacteristic = null;
+                
+                this.updateConnectionStatus();
+                this.enableControls(false);
+                this.updateForceDisplay(0);
+            }
+
+            updateConnectionStatus() {
+                const statusDot = document.getElementById('statusDot');
+                const statusText = document.getElementById('statusText');
+                const connectBtn = document.getElementById('connectBtn');
+
+                if (this.isConnected) {
+                    statusDot.classList.add('connected');
+                    statusText.textContent = 'Connected';
+                    connectBtn.textContent = 'Disconnect';
+                    connectBtn.className = 'btn btn-secondary';
+                } else {
+                    statusDot.classList.remove('connected');
+                    statusText.textContent = 'Disconnected';
+                    connectBtn.textContent = 'Connect';
+                    connectBtn.className = 'btn btn-primary';
+                }
+            }
+
+            enableControls(enabled) {
+                const controls = ['startBtn', 'stopBtn', 'tareBtn', 'calibrateBtn'];
+                controls.forEach(id => {
+                    document.getElementById(id).disabled = !enabled;
+                });
+            }
+
+            // TLV (Tag-Length-Value) command encoding
+            createTLVCommand(tag, data = new Uint8Array(0)) {
+                const command = new Uint8Array(2 + data.length);
+                command[0] = tag;
+                command[1] = data.length;
+                command.set(data, 2);
+                return command;
+            }
+
+            async sendCommand(tag, data = new Uint8Array(0)) {
+                if (!this.controlCharacteristic) {
+                    throw new Error('Not connected to device');
+                }
+                
+                const command = this.createTLVCommand(tag, data);
+                await this.controlCharacteristic.writeValue(command);
+                this.log(`Command sent: Tag ${tag}`, 'info');
+            }
+
+            async startStreaming() {
+                try {
+                    // Command tag for start streaming (based on Tindeq API)
+                    await this.sendCommand(0x01); // Start streaming command
+                    this.isStreaming = true;
+                    this.log('Started force data streaming', 'success');
+                    
+                    document.getElementById('startBtn').disabled = true;
+                    document.getElementById('stopBtn').disabled = false;
+                } catch (error) {
+                    this.log(`Failed to start streaming: ${error.message}`, 'error');
+                }
+            }
+
+            async stopStreaming() {
+                try {
+                    // Command tag for stop streaming
+                    await this.sendCommand(0x02); // Stop streaming command
+                    this.isStreaming = false;
+                    this.log('Stopped force data streaming', 'info');
+                    
+                    document.getElementById('startBtn').disabled = false;
+                    document.getElementById('stopBtn').disabled = true;
+                } catch (error) {
+                    this.log(`Failed to stop streaming: ${error.message}`, 'error');
+                }
+            }
+
+            async tare() {
+                try {
+                    await this.sendCommand(0x64); // Tare command
+                    this.log('Tare completed', 'success');
+                } catch (error) {
+                    this.log(`Tare failed: ${error.message}`, 'error');
+                }
+            }
+
+            async calibrate() {
+                try {
+                    // This would typically require a known reference weight
+                    this.log('Calibration feature - connect known weight and implement calibration routine', 'info');
+                } catch (error) {
+                    this.log(`Calibration failed: ${error.message}`, 'error');
+                }
+            }
+
+            async setSampleRate(rate) {
+                try {
+                    // Convert rate to bytes (little endian)
+                    const rateBytes = new Uint8Array(2);
+                    rateBytes[0] = rate & 0xFF;
+                    rateBytes[1] = (rate >> 8) & 0xFF;
+                    
+                    await this.sendCommand(0x03, rateBytes); // Set sample rate command
+                    this.log(`Sample rate set to ${rate} Hz`, 'success');
+                } catch (error) {
+                    this.log(`Failed to set sample rate: ${error.message}`, 'error');
+                }
+            }
+
+            async setFilterRate(rate) {
+                try {
+                    // Convert rate to bytes
+                    const rateBytes = new Uint8Array(2);
+                    const rateInt = Math.round(parseFloat(rate) * 100); // Convert to centi-Hz
+                    rateBytes[0] = rateInt & 0xFF;
+                    rateBytes[1] = (rateInt >> 8) & 0xFF;
+                    
+                    await this.sendCommand(0x04, rateBytes); // Set filter rate command
+                    this.log(`Filter rate set to ${rate} Hz`, 'success');
+                } catch (error) {
+                    this.log(`Failed to set filter rate: ${error.message}`, 'error');
+                }
+            }
+
+            handleDataReceived(dataView) {
+                try {
+                    // Parse TLV format data
+                    let offset = 0;
+                    while (offset < dataView.byteLength) {
+                        const tag = dataView.getUint8(offset);
+                        const length = dataView.getUint8(offset + 1);
+                        
+                        if (offset + 2 + length > dataView.byteLength) break;
+                        
+                        // Force data is typically in tag 0x01
+                        if (tag === 0x01 && length >= 4) {
+                            // Read force value as 32-bit float (little endian)
+                            const forceRaw = dataView.getFloat32(offset + 2, true);
+                            const force = forceRaw / 9.81; // Convert from N to kg
+                            
+                            this.updateForceDisplay(force);
+                            this.addForceDataPoint(force);
+                        }
+                        
+                        offset += 2 + length;
+                    }
+                } catch (error) {
+                    this.log(`Data parsing error: ${error.message}`, 'error');
+                }
+            }
+
+            updateForceDisplay(force) {
+                const forceValue = document.getElementById('forceValue');
+                forceValue.textContent = Math.abs(force).toFixed(1);
+                
+                // Color coding based on force
+                if (force > 50) {
+                    forceValue.style.color = '#ef4444'; // Red for high force
+                } else if (force > 20) {
+                    forceValue.style.color = '#f59e0b'; // Orange for medium force
+                } else {
+                    forceValue.style.color = '#667eea'; // Blue for low force
+                }
+            }
+
+            addForceDataPoint(force) {
+                const timestamp = Date.now();
+                this.forceData.push({ timestamp, force });
+                
+                // Keep only last 1000 data points
+                if (this.forceData.length > 1000) {
+                    this.forceData.shift();
+                }
+            }
+
+            log(message, type = 'info') {
+                const logContainer = document.getElementById('activityLog');
+                const timestamp = new Date().toLocaleTimeString();
+                const logEntry = document.createElement('div');
+                logEntry.className = `log-entry ${type}`;
+                logEntry.textContent = `[${timestamp}] ${message}`;
+                
+                logContainer.appendChild(logEntry);
+                logContainer.scrollTop = logContainer.scrollHeight;
+                
+                // Keep only last 50 log entries
+                while (logContainer.children.length > 50) {
+                    logContainer.removeChild(logContainer.firstChild);
                 }
             }
         }
 
-        // Auto-test on load
-        window.addEventListener('load', () => {
-            setTimeout(testBluetooth, 1000);
+        // Initialize the app when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            window.progressorApp = new TindeqProgressor();
+        });
+
+        // Handle page visibility for connection management
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && window.progressorApp && window.progressorApp.isConnected) {
+                // Optionally pause streaming when page is hidden to save battery
+                console.log('Page hidden - consider pausing streaming');
+            }
         });
     </script>
 </body>
