@@ -5,153 +5,77 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tindeq Progressor 200</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg,#667eea 0%,#764ba2 100%);
-      min-height: 100vh;
-      color: #333;
-      overflow-x: hidden;
-    }
-    .container { max-width: 400px; margin: 0 auto; padding: 20px; min-height: 100vh; display: flex; flex-direction: column; }
-    .header{ text-align:center;margin-bottom:30px;color:#fff; }
-    .header h1{font-size:1.8rem;font-weight:600;margin-bottom:8px;}
-    .header p{opacity:.9;font-size:.9rem;}
-    .card{background:rgba(255,255,255,.95);backdrop-filter:blur(10px);border-radius:20px;padding:25px;margin-bottom:20px;box-shadow:0 8px 32px rgba(0,0,0,.1);border:1px solid rgba(255,255,255,.2);}
-    .connection-status{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
-    .status-indicator{display:flex;align-items:center;gap:8px;font-weight:500;}
-    .status-dot{width:12px;height:12px;border-radius:50%;background:#ef4444;animation:pulse 2s infinite;}
-    .status-dot.connected{background:#10b981;}
-    @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.5;}}
-    .btn{padding:12px 24px;border:none;border-radius:12px;font-size:1rem;font-weight:600;cursor:pointer;transition:.3s;text-align:center;display:inline-block;text-decoration:none;}
-    .btn-primary{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;}
-    .btn-primary:hover{transform:translateY(-2px);box-shadow:0 4px 20px rgba(102,126,234,.4);}
-    .btn-secondary{background:#f3f4f6;color:#374151;}
-    .btn-secondary:hover{background:#e5e7eb;}
-    .btn:disabled{opacity:.5;cursor:not-allowed;}
-    .force-display{text-align:center;margin:30px 0;}
-    .force-value{font-size:3rem;font-weight:700;color:#667eea;margin-bottom:10px;text-shadow:0 2px 4px rgba(0,0,0,.1);}
-    .force-unit{font-size:1.2rem;color:#6b7280;font-weight:500;}
-    .controls{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin:20px 0;}
-    .log{background:#1f2937;color:#e5e7eb;padding:15px;border-radius:12px;max-height:200px;overflow-y:auto;font-family:"Courier New",monospace;font-size:.85rem;line-height:1.4;}
-    .log-entry{margin-bottom:5px;padding:2px 0;}
-    .log-entry.error{color:#ef4444;}
-    .log-entry.success{color:#10b981;}
-    .log-entry.info{color:#3b82f6;}
-    .chart-container{height:200px;margin:20px 0;background:#f9fafb;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#6b7280;}
-    @media(max-width:480px){.container{padding:15px;}.controls{grid-template-columns:1fr;}.force-value{font-size:2.5rem;}}
-    .footer{margin-top:auto;text-align:center;color:rgba(255,255,255,.8);font-size:.8rem;padding:20px 0;}
-    .device-info{font-size:.8rem;color:#6b7280;margin-top:10px;}
+    /* --- styles unchanged (trimmed for brevity) --- */
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;color:#333;overflow-x:hidden}
+    .container{max-width:400px;margin:0 auto;padding:20px;min-height:100vh;display:flex;flex-direction:column}
+    .header{text-align:center;margin-bottom:30px;color:#fff}.header h1{font-size:1.8rem;font-weight:600;margin-bottom:8px}.header p{opacity:.9;font-size:.9rem}
+    .card{background:rgba(255,255,255,.95);backdrop-filter:blur(10px);border-radius:20px;padding:25px;margin-bottom:20px;box-shadow:0 8px 32px rgba(0,0,0,.1);border:1px solid rgba(255,255,255,.2)}
+    .connection-status{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}.status-indicator{display:flex;align-items:center;gap:8px;font-weight:500}
+    .status-dot{width:12px;height:12px;border-radius:50%;background:#ef4444;animation:pulse 2s infinite}.status-dot.connected{background:#10b981}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+    .btn{padding:12px 24px;border:none;border-radius:12px;font-size:1rem;font-weight:600;cursor:pointer;transition:.3s;text-align:center;display:inline-block;text-decoration:none}
+    .btn-primary{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff}.btn-primary:hover{transform:translateY(-2px);box-shadow:0 4px 20px rgba(102,126,234,.4)}
+    .btn-secondary{background:#f3f4f6;color:#374151}.btn-secondary:hover{background:#e5e7eb}.btn:disabled{opacity:.5;cursor:not-allowed}
+    .force-display{text-align:center;margin:30px 0}.force-value{font-size:3rem;font-weight:700;color:#667eea;margin-bottom:10px;text-shadow:0 2px 4px rgba(0,0,0,.1)}.force-unit{font-size:1.2rem;color:#6b7280;font-weight:500}
+    .controls{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin:20px 0}
+    .log{background:#1f2937;color:#e5e7eb;padding:15px;border-radius:12px;max-height:200px;overflow-y:auto;font-family:"Courier New",monospace;font-size:.85rem;line-height:1.4}
+    .log-entry{margin-bottom:4px}.log-entry.error{color:#ef4444}.log-entry.success{color:#10b981}.log-entry.info{color:#3b82f6}
+    @media(max-width:480px){.container{padding:15px}.controls{grid-template-columns:1fr}.force-value{font-size:2.5rem}}
+    .footer{margin-top:auto;text-align:center;color:rgba(255,255,255,.8);font-size:.8rem;padding:20px 0}
+    .device-info{font-size:.8rem;color:#6b7280;margin-top:10px}
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="header">
-      <h1>Tindeq Progressor 200</h1>
-      <p>Professional Force Measurement</p>
-    </div>
+    <div class="header"><h1>Tindeq Progressor 200</h1><p>Professional Force Measurement</p></div>
     <div class="card">
       <div class="connection-status">
-        <div class="status-indicator">
-          <div class="status-dot" id="statusDot"></div>
-          <span id="statusText">Disconnected</span>
-        </div>
+        <div class="status-indicator"><div class="status-dot" id="statusDot"></div><span id="statusText">Disconnected</span></div>
         <button class="btn btn-primary" id="connectBtn">Connect</button>
       </div>
-      <div class="device-info" id="deviceInfo" style="display:none;">Device: <span id="deviceName"></span></div>
+      <div class="device-info" id="deviceInfo" style="display:none">Device: <span id="deviceName"></span></div>
     </div>
     <div class="card">
       <div class="force-display"><div class="force-value" id="forceValue">0.0</div><div class="force-unit">kg</div></div>
-      <div class="chart-container" id="chartContainer">Real-time force chart will appear here</div>
+      <div class="chart-container">Hook your chart lib here</div>
     </div>
-    <div class="card">
-      <div class="controls">
-        <button class="btn btn-secondary" id="startBtn" disabled>Start</button>
-        <button class="btn btn-secondary" id="stopBtn" disabled>Stop</button>
-        <button class="btn btn-secondary" id="tareBtn" disabled>Tare</button>
-        <button class="btn btn-secondary" id="scanBtn">Scan Devices</button>
-      </div>
-    </div>
-    <div class="card">
-      <h3 style="margin-bottom:15px;">Activity Log</h3>
-      <div class="log" id="activityLog"><div class="log-entry info">Ready to connect to Progressor 200…</div></div>
-    </div>
-    <div class="footer"><p>Built with Web Bluetooth API | Open Source</p></div>
+    <div class="card"><div class="controls"><button class="btn btn-secondary" id="tareBtn" disabled>Tare</button><button class="btn btn-secondary" id="stopBtn" disabled>Stop</button><button class="btn btn-secondary" id="scanBtn">Scan</button></div></div>
+    <div class="card"><h3 style="margin-bottom:12px">Activity Log</h3><div class="log" id="activityLog"><div class="log-entry info">Ready…</div></div></div>
+    <div class="footer"><p>Built with Web Bluetooth API ©</p></div>
   </div>
 <script>
-class TindeqProgressor {
+class Progressor {
   constructor(){
-    this.device=null;this.server=null;this.service=null;this.controlCharacteristic=null;this.dataCharacteristic=null;this.isConnected=false;
-    this.config={SERVICE_UUID:'7e4e1701-1ea6-40c9-9dcc-13d34ffead57',CONTROL_CHARACTERISTIC_UUID:'7e4e1703-1ea6-40c9-9dcc-13d34ffead57',DATA_CHARACTERISTIC_UUID:'7e4e1702-1ea6-40c9-9dcc-13d34ffead57'};
-    this.addEvents();this.log('App ready','info');}
-
-  addEvents(){
-    connectBtn.addEventListener('click',()=>this.toggleConnection());
-    startBtn.addEventListener('click',()=>this.start());
-    stopBtn.addEventListener('click',()=>this.stop());
-    tareBtn.addEventListener('click',()=>this.sendCommand(0x64));
-    scanBtn.addEventListener('click',()=>this.scan());
+    this.cfg={svc:'7e4e1701-1ea6-40c9-9dcc-13d34ffead57',data:'7e4e1702-1ea6-40c9-9dcc-13d34ffead57',ctrl:'7e4e1703-1ea6-40c9-9dcc-13d34ffead57'};
+    this.dev=this.srv=this.dataCh=this.ctrlCh=null;this.connected=false;
+    this.bindUI();this.log('Init done','info');
   }
-
-  async toggleConnection(){this.isConnected?await this.disconnect():await this.connect();}
-
-  async connect(){
-    try{
-      this.device=await navigator.bluetooth.requestDevice({filters:[{namePrefix:'Progressor'},{namePrefix:'Tindeq'}],optionalServices:[this.config.SERVICE_UUID]});
-      this.server=await this.device.gatt.connect();
-      this.service=await this.server.getPrimaryService(this.config.SERVICE_UUID);
-      this.controlCharacteristic=await this.service.getCharacteristic(this.config.CONTROL_CHARACTERISTIC_UUID);
-      this.dataCharacteristic=await this.service.getCharacteristic(this.config.DATA_CHARACTERISTIC_UUID);
-      await this.dataCharacteristic.startNotifications();
-      this.dataCharacteristic.addEventListener('characteristicvaluechanged',e=>this.handleData(e.target.value));
-      this.device.addEventListener('gattserverdisconnected',()=>this.disconnect());
-      deviceName.textContent=this.device.name;deviceInfo.style.display='block';
-      this.isConnected=true;this.updateUI();this.log('Connected','success');
-    }catch(e){this.log(`Connect error: ${e.message}`,'error');}
-  }
-
-  async disconnect(){
-    if(this.device?.gatt?.connected)await this.device.gatt.disconnect();
-    this.isConnected=false;this.updateUI();deviceInfo.style.display='none';this.log('Disconnected','info');
-  }
-
-  /* TLV helper */
-  buildCmd(op){return new Uint8Array([op,0x00]);}
-  async sendCommand(op){await this.controlCharacteristic.writeValue(this.buildCmd(op));this.log(`Sent 0x${op.toString(16)}`,'info');}
-
-  /* Start/stop wrappers */
-  async start(){await this.sendCommand(0x65);startBtn.disabled=true;stopBtn.disabled=false;}
-  async stop(){await this.sendCommand(0x66);startBtn.disabled=false;stopBtn.disabled=true;}
-
-  /* Notifications */
-  handleData(dv){
-    if(dv.getUint8(0)===0x01&&dv.getUint8(1)===8){
-      const weightN=dv.getFloat32(2,true);const kg=Math.abs(weightN/9.81);
-      forceValue.textContent=kg.toFixed(1);
-      forceValue.style.color=kg>50?'#ef4444':kg>20?'#f59e0b':'#667eea';
-    }
-  }
-
-  /* Scan helper */
-  async scan(){
-    try{const dev=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:[this.config.SERVICE_UUID]});this.log(`Found: ${dev.name}`,'info');}catch(e){this.log(`Scan error: ${e.message}`,'error');}
-  }
-
-  updateUI(){
-    statusDot.classList.toggle('connected',this.isConnected);
-    statusText.textContent=this.isConnected?'Connected':'Disconnected';
-    connectBtn.textContent=this.isConnected?'Disconnect':'Connect';
-    connectBtn.className=this.isConnected?'btn btn-secondary':'btn btn-primary';
-    startBtn.disabled=stopBtn.disabled=tareBtn.disabled=!this.isConnected;
-    startBtn.disabled|| (stopBtn.disabled=true); // ensure start enabled stop disabled on connect
-  }
-
-  log(msg,type='info'){
-    const e=document.createElement('div');e.className=`log-entry ${type}`;e.textContent=`[${new Date().toLocaleTimeString()}] ${msg}`;
-    activityLog.appendChild(e);activityLog.scrollTop=activityLog.scrollHeight;while(activityLog.children.length>50)activityLog.removeChild(activityLog.firstChild);
-  }
+  bindUI(){connectBtn.onclick=()=>this.connected?this.disconnect():this.connect();tareBtn.onclick=()=>this.cmd(0x64);stopBtn.onclick=()=>this.cmd(0x66);scanBtn.onclick=()=>this.scan();}
+  async scan(){try{const d=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:[this.cfg.svc]});this.log(`Found ${d.name||'unknown'}`,'info');}catch(e){this.log(`Scan err: ${e}`,'error');}}
+  async connect(){try{
+      this.dev=await navigator.bluetooth.requestDevice({filters:[{namePrefix:'Progressor'},{namePrefix:'Tindeq'}],optionalServices:[this.cfg.svc]});
+      this.srv=await this.dev.gatt.connect();
+      this.ctrlCh=await (await this.srv.getPrimaryService(this.cfg.svc)).getCharacteristic(this.cfg.ctrl);
+      this.dataCh=await (await this.srv.getPrimaryService(this.cfg.svc)).getCharacteristic(this.cfg.data);
+      await this.dataCh.startNotifications();
+      this.dataCh.addEventListener('characteristicvaluechanged',e=>this.handleData(e.target.value));
+      this.dev.addEventListener('gattserverdisconnected',()=>this.disconnect());
+      deviceName.textContent=this.dev.name;deviceInfo.style.display='block';
+      this.connected=true;this.updateUI();
+      // auto tare + start
+      await this.cmd(0x64);await this.cmd(0x65);
+      this.log('Connected & streaming','success');
+    }catch(e){this.log(`Conn err: ${e.message}`,'error');}}
+  async disconnect(){try{await this.dev?.gatt?.disconnect();}catch{};this.connected=false;this.updateUI();deviceInfo.style.display='none';this.log('Disconnected','info');}
+  async cmd(op){if(!this.ctrlCh)return;const pkt=new Uint8Array([op,0x00]);await this.ctrlCh.writeValue(pkt);this.log(`TX 0x${op.toString(16)}`,'info');}
+  handleData(dv){const tag=dv.getUint8(0),len=dv.getUint8(1);if(tag===0x01&&len>=4){const weightN=dv.getFloat32(2,true);const kg=Math.abs(weightN/9.81);forceValue.textContent=kg.toFixed(1);forceValue.style.color=kg>50?'#ef4444':kg>20?'#f59e0b':'#667eea';}
+    // debug dump
+    const b=[...new Uint8Array(dv.buffer)].map(x=>x.toString(16).padStart(2,'0')).join(' ');
+    this.log(`RX (${dv.byteLength}): ${b}`,'info');}
+  updateUI(){statusDot.classList.toggle('connected',this.connected);statusText.textContent=this.connected?'Connected':'Disconnected';connectBtn.textContent=this.connected?'Disconnect':'Connect';connectBtn.className=this.connected?'btn btn-secondary':'btn btn-primary';tareBtn.disabled=stopBtn.disabled=!this.connected;}
+  log(msg,type='info'){const e=document.createElement('div');e.className=`log-entry ${type}`;e.textContent=`[${new Date().toLocaleTimeString()}] ${msg}`;activityLog.appendChild(e);activityLog.scrollTop=activityLog.scrollHeight;while(activityLog.children.length>80)activityLog.removeChild(activityLog.firstChild);}
 }
-document.addEventListener('DOMContentLoaded',()=>new TindeqProgressor());
+document.addEventListener('DOMContentLoaded',()=>new Progressor());
 </script>
 </body>
 </html>
