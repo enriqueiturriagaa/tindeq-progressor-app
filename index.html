@@ -249,7 +249,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Tindeq Progressor 200</h1>
+            <h1>Tindeq Progressor 200 7.0</h1>
             <p>Professional Force Measurement</p>
         </div>
 
@@ -330,6 +330,8 @@
                 this.isConnected = false;
                 this.isStreaming = false;
                 this.forceData = [];
+                this.pollingInterval = null;
+                this.notificationsEnabled = false;
                 
                 // Try multiple possible UUIDs for Tindeq Progressor
                 this.possibleConfigs = [
@@ -482,19 +484,49 @@
                     try {
                         this.log(`Trying service UUID: ${config.SERVICE_UUID}`, 'info');
                         this.service = await this.server.getPrimaryService(config.SERVICE_UUID);
+                        this.log('Service found successfully', 'success');
                         
                         // Try to get characteristics
-                        this.controlCharacteristic = await this.service.getCharacteristic(config.CONTROL_CHARACTERISTIC_UUID);
-                        this.dataCharacteristic = await this.service.getCharacteristic(config.DATA_CHARACTERISTIC_UUID);
+                        try {
+                            this.controlCharacteristic = await this.service.getCharacteristic(config.CONTROL_CHARACTERISTIC_UUID);
+                            this.log('Control characteristic found', 'success');
+                        } catch (error) {
+                            this.log(`Control characteristic failed: ${error.message}`, 'error');
+                            continue;
+                        }
+                        
+                        try {
+                            this.dataCharacteristic = await this.service.getCharacteristic(config.DATA_CHARACTERISTIC_UUID);
+                            this.log('Data characteristic found', 'success');
+                        } catch (error) {
+                            this.log(`Data characteristic failed: ${error.message}`, 'error');
+                            continue;
+                        }
                         
                         this.currentConfig = config;
                         this.log('Found Progressor service and characteristics!', 'success');
                         
-                        // Enable notifications for data characteristic
-                        await this.dataCharacteristic.startNotifications();
-                        this.dataCharacteristic.addEventListener('characteristicvaluechanged', (event) => {
-                            this.handleDataReceived(event.target.value);
-                        });
+                        // Check if data characteristic supports notifications
+                        const properties = this.dataCharacteristic.properties;
+                        this.log(`Data characteristic properties: notify=${properties.notify}, indicate=${properties.indicate}`, 'info');
+                        
+                        // Try to enable notifications only if supported
+                        if (properties.notify || properties.indicate) {
+                            try {
+                                await this.dataCharacteristic.startNotifications();
+                                this.dataCharacteristic.addEventListener('characteristicvaluechanged', (event) => {
+                                    this.handleDataReceived(event.target.value);
+                                });
+                                this.notificationsEnabled = true;
+                                this.log('Notifications enabled successfully', 'success');
+                            } catch (notifyError) {
+                                this.log(`Notification setup failed: ${notifyError.message}`, 'error');
+                                this.notificationsEnabled = false;
+                                this.log('Will use polling mode instead', 'info');
+                            }
+                        } else {
+                            this.log('Data characteristic does not support notifications', 'info');
+                        }
                         
                         return; // Success!
                         
@@ -527,6 +559,8 @@
             handleDisconnection() {
                 this.isConnected = false;
                 this.isStreaming = false;
+                this.notificationsEnabled = false;
+                this.stopPolling();
                 this.device = null;
                 this.server = null;
                 this.service = null;
@@ -604,14 +638,48 @@
                     if (this.isStreaming) {
                         document.getElementById('startBtn').disabled = true;
                         document.getElementById('stopBtn').disabled = false;
+                        
+                        // If notifications are not enabled, start polling
+                        if (!this.notificationsEnabled) {
+                            this.startPolling();
+                        }
                     }
                 } catch (error) {
                     this.log(`Failed to start streaming: ${error.message}`, 'error');
                 }
             }
 
+            startPolling() {
+                this.log('Starting data polling mode', 'info');
+                this.pollingInterval = setInterval(async () => {
+                    try {
+                        if (this.dataCharacteristic && this.isStreaming) {
+                            const value = await this.dataCharacteristic.readValue();
+                            this.handleDataReceived(value);
+                        }
+                    } catch (error) {
+                        // Silently handle polling errors to avoid spam
+                        if (error.message.includes('GATT operation not permitted')) {
+                            // This is normal - characteristic might not be readable
+                        } else {
+                            console.log('Polling error:', error.message);
+                        }
+                    }
+                }, 100); // Poll every 100ms
+            }
+
+            stopPolling() {
+                if (this.pollingInterval) {
+                    clearInterval(this.pollingInterval);
+                    this.pollingInterval = null;
+                    this.log('Stopped data polling', 'info');
+                }
+            }
+
             async stopStreaming() {
                 try {
+                    this.stopPolling();
+                    
                     // Try different stop streaming command tags
                     const stopCommands = [0x02, 0x0C, 0x11];
                     
